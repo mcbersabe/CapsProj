@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="../styles.css">
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+        }
+
+        .container {
+            display: flex;
+            height: 100%;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+        }
+
+        .sidebar {
+            background-color: #333;
+            color: white;
+            padding: 20px;
+            height: 100vh;
+            width: 20%;
+            /* Set sidebar height to 100% of viewport height */
+            position: fixed;
+            left: 0;
+            top: 0;
+            overflow-y: auto;
+            /* Enable vertical scrolling if content exceeds viewport height */
+        }
+
+        .sidebar h2 {
+            margin-bottom: 20px;
+        }
+
+        .sidebar ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar li {
+            margin-bottom: 10px;
+        }
+
+        .sidebar a {
+            display: block;
+            /* Make links fill entire width of sidebar */
+            text-decoration: none;
+            color: white;
+            padding: 10px;
+            /* Add padding for better clickability */
+        }
+
+        .sidebar a:hover {
+            background-color: #555;
+            /* Change background color on hover */
+        }
+
+
+        .content {
+            flex: 1;
+            padding: 40px;
+            padding-left: 20px;
+            padding-right: 300px;
+            margin-left: 300px;
+            margin-right: 200px;
+            height: fit-content;
+            background-color: #ffffffdc;
+            /* Adjust margin to account for sidebar width */
+        }
+
+        .header {
+            background-color: #e3e3e3;
+            color: rgb(0, 0, 0);
+            padding: 10px 20px;
+            margin-bottom: 20px;
+        }
+
+        .header h2 {
+            color: rgb(0, 0, 0);
+        }
+
+        .export-btn {
+            width: 80px;
+            height: 40px;
+            display: inline-block;
+            padding: 0.5em 1em;
+            margin: 0.5em;
+            /* Basic styles */
+            background-color: #a99000;
+            /* Set a background color */
+            border: 1px solid #ccc;
+            /* Set a border */
+            border-radius: 4px;
+            /* Add rounded corners */
+            cursor: pointer;
+            /* Indicate clickable behavior */
+            /* Specific size */
+            width: 80px;
+            height: 30px;
+        }
+
+        .logout-btn {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+            /* Add margin to separate logout button from tabs */
+        }
+
+        .logout-btn:hover {
+            background-color: #d32f2f;
+        }
+
+        .page-title {
+            margin-bottom: 20px;
+        }
+
+        /* Style for tabs */
+        .tab {
+            overflow: hidden;
+            border: 1px solid #ccc;
+            background-color: #f1f1f1;
+            margin-top: 20px;
+            /* Add margin to separate tabs from header */
+        }
+
+        .tab .tablinks {
+            background-color: inherit;
+            display: block;
+            /* Make buttons fill entire width of tab container */
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: background-color 0.3s ease;
+            width: 100%;
+            /* Ensure buttons fill entire width of tab container */
+            text-align: left;
+            /* Align text to the left */
+            color: #333;
+            /* Set text color for tab links */
+        }
+
+        .tab .tablinks:hover {
+            background-color: #ddd;
+        }
+
+        .tab .tablinks.active {
+            background-color: #4f4040ed;
+            color: #fff;
+            /* Set text color for active tab */
+        }
+
+        /* Panel to display today's confirmed appointments */
+        #today-appointments-panel {
+            position: fixed;
+            right: 0;
+            top: 0;
+            width: 150px;
+            height: 100%;
+            background-color: #f4f4f4;
+            border-left: 1px solid #ccc;
+            padding: 20px;
+            box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+        }
+
+        #today-appointments-panel h2 {
+            margin-top: 0;
+            font-size: 24px;
+        }
+
+        #today-appointments-list {
+            margin-top: 20px;
+        }
+
+        .appointment-item {
+            padding: 10px;
+            border: 1px solid #ddd;
+            margin-bottom: 10px;
+            cursor: pointer;
+            background-color: #fff;
+            border-radius: 4px;
+        }
+
+        .appointment-item:hover {
+            background-color: #f0f0f0;
+        }
+
+        /* Modal to display appointment details */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: #fff;
+            margin: 10% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 600px;
+            border-radius: 4px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        #appointment-details p {
+            margin: 5px 0;
+        }
+
+        #reschedule-btn,
+        #complete-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        #complete-btn {
+            background-color: #28a745;
+        }
+
+        #reschedule-btn:hover,
+        #complete-btn:hover {
+            background-color: #0056b3;
+        }
+
+        #complete-btn:hover {
+            background-color: #218838;
+        }
+
+        /* Container styling */
+        .pending-appointments-container {
+            width: 100%;
+            max-height: 100vh;
+            overflow: auto;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        /* Table styling */
+        .appointment-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: medium;
+            /* Small font size to fit more content */
+        }
+
+        .appointment-table th,
+        .appointment-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .appointment-table th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        .appointment-table tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .appointment-table tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        /* Action button styles */
+        .action-buttons {
+            display: flex;
+            /* Arrange buttons horizontally */
+            justify-content: space-between;
+            /* Distribute buttons evenly */
+        }
+
+        .action-btn1,
+        .action-btn2,
+        .action-btn3 {
+            /* Inherit most styles from general button rule (if any) */
+            background-color: #3498db;
+            /* Set a custom background color */
+            color: #fff;
+            /* White text color for contrast */
+            padding: 5px 10px;
+            /* Adjust padding as needed */
+            border: none;
+            /* Remove border if needed */
+            border-radius: 4px;
+            /* Add rounded corners */
+            cursor: pointer;
+            /* Indicate clickable behavior */
+            /* Remove full width (optional) */
+            width: auto;
+            /* You can remove this if you want full width buttons */
+            margin: 2px;
+            /* Add spacing between buttons */
+        }
+
+        .action-btn1:hover,
+        .action-btn2:hover,
+        .action-btn3:hover {
+            background-color: #2980b9;
+            /* Adjust hover color as needed */
+        }
+
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0, 0, 0);
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+
+        <div class="sidebar">
+            <div class="header">
+                <h2 id="welcome-message">Welcome, Admin</h2>
+                <button id="logout-btn" class="logout-btn">Logout</button>
+            </div>
+
+            <div class="tab">
+                <a class="tablinks active" href="main-schedadmin.html">Dashboard</a>
+                <a class="tablinks" href="manage-sched-data.html">Manage Scheduling Data</a>
+                <a class="tablinks" href="manage-history.html">History/Completed Transaction</a>
+            </div>
+        </div>
+
+        <div class="content">
+            <h1 class="page-title">Dashboard</h1>
+
+            <div class="time-interval">
+                <label for="time-interval">Appointment/s created:</label>
+                <select id="time-interval">
+                    <option value="today">Today</option>
+                    <option value="last-month">last month</option>
+                    <option value="monthly">This Month</option>
+                    <option value="yearly">This Year</option>
+                    <!-- Add more options as needed -->
+                </select>
+            </div>
+
+            <div id="overview">
+                <h2>Overview of Scheduling Operations</h2>
+                <ul>
+                    <li>Total Appointments: <span id="total-appointments">--</span></li>
+                    <li>Pending Appointments: <span id="pending-appointments">--</span></li>
+                    <li>Confirmed Appointments: <span id="confirmed-appointments">--</span></li>
+                    <li>Completed Appointments: <span id="completed-appointments">--</span></li>
+                    <li>Cancelled Appointments: <span id="cancelled-appointments">--</span></li>
+                </ul>
+            </div>
+
+            <div class="pending-appointments-container">
+                <h2>Pending Appointments <button class="export-btn"
+                        onclick="exportTableToCSV('pending_appointments.csv')">Export</button>
+                </h2>
+                <table class="appointment-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Pet Name</th>
+                            <th>Owner Name</th>
+                            <th>Species</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Purpose</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pending-appointments-table-body">
+                        <!-- Pending appointment rows will be dynamically added here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Panel to display today's confirmed appointments -->
+        <div id="today-appointments-panel">
+            <h2>Today's Schedule</h2>
+            <div id="today-appointments-list">
+                <!-- Appointments will be dynamically added here -->
+            </div>
+        </div>
+
+        <!-- Appointment Details Modal -->
+        <div id="appointment-details-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-button" onclick="closeDetailsModal()">&times;</span>
+                <div id="appointment-details"></div>
+                <button id="reschedule-btn">Reschedule</button>
+                <button id="complete-btn">Complete</button>
+            </div>
+        </div>
+
+        <!-- Reschedule Modal -->
+        <div id="reschedule-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-button" onclick="closeRescheduleModal()">&times;</span>
+                <h2>Reschedule Appointment</h2>
+                <label for="reschedule-date">New Date:</label>
+                <input type="date" id="reschedule-date">
+
+                <label for="reschedule-time">New Time:</label>
+                <select id="reschedule-time" name="reschedule-time" required>
+                    <option value="" disabled selected>Select a time</option>
+                    <option value="9:00:00">9:00 AM</option>
+                    <option value="10:00:00">10:00 AM</option>
+                    <option value="11:00:00">11:00 AM</option>
+                    <option value="12:00:00">12:00 AM</option>
+                    <option value="13:00:00">1:00 PM</option>
+                    <option value="14:00:00">2:00 PM</option>
+                    <option value="15:00:00">3:00 PM</option>
+                    <option value="16:00:00">4:00 PM</option>
+                </select>
+                <button id="submit-date-time">Submit Date & Time</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // For sidebar username
+        fetch('/current-user')
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('Failed to fetch user data');
+                }
+            })
+            .then(data => {
+                // Update UI to display current user's information
+                const welcomeMessage = document.getElementById('welcome-message');
+                welcomeMessage.textContent = `Welcome, ${data.user.username}`;
+            })
+            .catch(error => {
+                console.error('Error fetching user data:', error);
+            });
+
+        // Function to fetch data based on selected time interval
+        function fetchOverview(interval) {
+            fetch(`/scheduling/overview?interval=${interval}`)
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        throw new Error('Failed to fetch overview data');
+                    }
+                })
+                .then(data => {
+                    // Update the overview section with the retrieved data
+                    document.getElementById('total-appointments').textContent = data.total_appointments;
+                    document.getElementById('pending-appointments').textContent = data.pending_appointments;
+                    document.getElementById('confirmed-appointments').textContent = data.confirmed_appointments;
+                    document.getElementById('completed-appointments').textContent = data.completed_appointments;
+                    document.getElementById('cancelled-appointments').textContent = data.cancelled_appointments;
+                })
+                .catch(error => {
+                    console.error('Error fetching overview data:', error);
+                });
+        }
+
+        // Event listener for changes in the dropdown selection
+        document.getElementById('time-interval').addEventListener('change', function () {
+            const selectedInterval = this.value;
+            fetchOverview(selectedInterval);
+        });
+
+        // Initial fetch when the page loads with the default interval
+        fetchOverview('today');
+
+        // For logout button
+        document.getElementById('logout-btn').addEventListener('click', function () {
+            // Display a confirmation dialog
+            const confirmed = confirm('Are you sure you want to logout?');
+            if (!confirmed) {
+                return; // Do nothing if the user cancels the logout
+            }
+
+            // Perform logout via AJAX
+            fetch('/logout', {
+                method: 'POST'
+            })
+                .then(response => {
+                    if (response.ok) {
+                        // Redirect to login page after successful logout
+                        window.location.href = '/login.html';
+                    } else {
+                        console.error('Logout failed:', response.statusText);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error during logout:', error);
+                });
+        });
+
+        // Function to fetch and display today's confirmed appointments
+        function fetchTodayAppointments() {
+            fetch('/api/appointments/today')
+                .then(response => response.json())
+                .then(appointments => {
+                    const todayAppointmentsList = document.getElementById("today-appointments-list");
+                    todayAppointmentsList.innerHTML = "";
+
+                    appointments.forEach(appointment => {
+                        const appointmentDiv = document.createElement("div");
+                        appointmentDiv.className = "appointment-item";
+                        appointmentDiv.textContent = `${appointment.appointment_time} - ${appointment.owner_username}`;
+                        appointmentDiv.onclick = () => showAppointmentDetails(appointment);
+                        todayAppointmentsList.appendChild(appointmentDiv);
+                    });
+                })
+                .catch(error => console.error('Error fetching today\'s appointments:', error));
+        }
+
+        function formatDate(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function showAppointmentDetails(appointment) {
+            const appointmentDate = new Date(appointment.appointment_date);
+            const formattedDate = formatDate(appointmentDate);
+
+            const appointmentDetails = document.getElementById("appointment-details");
+            appointmentDetails.innerHTML = `
+        <p>ID: ${appointment.id}</p>
+        <p>Pet Name: ${appointment.pet_name}</p>
+        <p>Owner Name: ${appointment.owner_username}</p>
+        <p>Species: ${appointment.species}</p>
+        <p>Date: ${formattedDate}</p>
+        <p>Time: ${appointment.appointment_time}</p> <!-- Use appointment_time directly -->
+        <p>Purpose: ${appointment.purpose}</p>
+        <p>Status: ${appointment.status}</p>
+    `;
+
+            document.getElementById("reschedule-btn").onclick = () => openRescheduleModal(appointment.id);
+            document.getElementById("complete-btn").onclick = () => completeAppointment(appointment.id);
+
+            const modal = document.getElementById("appointment-details-modal");
+            modal.style.display = "block";
+        }
+
+
+        // Function to close the reschedule modal
+        function closeRescheduleModal() {
+            const modal = document.getElementById("reschedule-modal");
+            modal.style.display = "none";
+        }
+
+        // Function to close the appointment details modal
+        function closeDetailsModal() {
+            const modal = document.getElementById("appointment-details-modal");
+            modal.style.display = "none";
+        }
+
+        // Function to submit reschedule form (replaced)
+        function submitReschedule(appointmentId) {
+            if (!confirm('Are you sure you want to reschedule this appointment?')) {
+                return;
+            }
+            const newDate = document.getElementById("reschedule-date").value;
+            const newTime = document.getElementById("reschedule-time").value;
+
+            // Validation for date and time
+            const now = new Date();
+            const selectedDate = new Date(newDate + 'T' + newTime);
+            const selectedHour = selectedDate.getHours();
+
+            if (selectedDate < now) {
+                alert('The date and time must be in the future.');
+                return;
+            }
+
+            if (selectedHour < 9 || selectedHour > 16) {
+                alert('The time must be between 9 AM and 4 PM.');
+                return;
+            }
+
+            const updatedAppointment = {
+                appointment_date: newDate,
+                appointment_time: newTime
+            };
+
+            fetch(`/api/appointments/${appointmentId}/reschedule`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(updatedAppointment)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Appointment rescheduled successfully');
+                        location.reload(); // For simplicity, reloading the page
+                    } else if (data.error) {
+                        alert(data.error); // Display error message returned from the server
+                    } else {
+                        alert('Failed to reschedule appointment');
+                    }
+                })
+                .catch(error => console.error('Error rescheduling appointment:', error));
+        }
+
+        // Function to complete an appointment
+        function completeAppointment(appointmentId) {
+            if (!confirm('Are you sure you want to mark this appointment as completed?')) {
+                return;
+            }
+            const updatedStatus = { status: 'Completed' };
+
+            fetch(`/api/appointments/${appointmentId}/status`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(updatedStatus)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Appointment completed successfully');
+                        location.reload(); // Refresh the page to reflect changes
+                    } else {
+                        alert('Failed to complete appointment');
+                    }
+                })
+                .catch(error => console.error('Error completing appointment:', error));
+        }
+
+        // Fetch today's appointments on page load
+        window.onload = fetchTodayAppointments;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchPendingAppointments();
+        });
+
+        function fetchPendingAppointments() {
+            fetch('/api/appointments/pending')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Pending appointments:', data); // Add this line
+                    populatePendingAppointmentsTable(data);
+                })
+                .catch(error => console.error('Error fetching pending appointments:', error));
+        }
+
+        function populatePendingAppointmentsTable(appointments) {
+            const tableBody = document.getElementById("pending-appointments-table-body");
+            tableBody.innerHTML = "";
+
+            appointments.forEach(appointment => {
+                const appointmentDate = new Date(appointment.appointment_date);
+                const formattedDate = formatDate(appointmentDate);
+
+                const row = document.createElement("tr");
+                row.innerHTML = `
+            <td>${appointment.id}</td>
+            <td>${appointment.pet_name}</td>
+            <td>${appointment.owner_username}</td>
+            <td>${appointment.species}</td>
+            <td>${formattedDate}</td>
+            <td>${appointment.appointment_time}</td> <!-- Use appointment_time directly -->
+            <td>${appointment.purpose}</td>
+            <td>${appointment.status}</td>
+            <td>
+                <div class="action-buttons">
+                    <button class="action-btn1" onclick="confirmAppointment(${appointment.id})">&#10004;</button>
+                    <button class="action-btn2" onclick="cancelAppointment(${appointment.id})">&#10008;</button>
+                    <button class="action-btn3" onclick="openRescheduleModal(${appointment.id})">&#8635;</button>
+                </div>
+            </td>
+        `;
+                tableBody.appendChild(row);
+            });
+        }
+
+
+        // Function to confirm an appointment
+        function confirmAppointment(appointmentId) {
+            if (!confirm('Are you sure you want to confirm this appointment?')) {
+                return;
+            }
+            const updatedStatus = { status: 'Confirmed' };
+
+            fetch(`/api/appointments/${appointmentId}/status`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(updatedStatus)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Appointment confirmed successfully');
+                        location.reload(); // Refresh the page to reflect changes
+                    } else {
+                        alert('Failed to confirm appointment');
+                    }
+                })
+                .catch(error => console.error('Error confirming appointment:', error));
+        }
+
+        // Function to cancel an appointment
+        function cancelAppointment(appointmentId) {
+            if (!confirm('Are you sure you want to cancel this appointment?')) {
+                return;
+            }
+            const updatedStatus = { status: 'Cancelled' };
+
+            fetch(`/api/appointments/${appointmentId}/status`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(updatedStatus)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Appointment cancelled successfully');
+                        location.reload(); // Refresh the page to reflect changes
+                    } else {
+                        alert('Failed to cancel appointment');
+                    }
+                })
+                .catch(error => console.error('Error cancelling appointment:', error));
+        }
+
+        function openRescheduleModal(appointmentId) {
+            const modal = document.getElementById("reschedule-modal");
+
+            // Fetch the appointment details
+            fetch(`/api/appointments/${appointmentId}`)
+                .then(response => response.json())
+                .then(data => {
+                    const { appointment_date, appointment_time } = data;
+
+                    // Create a new Date object from the appointment_date
+                    const date = new Date(appointment_date);
+                    const formattedDate = formatDate(date);
+
+                    // Set the values in the input fields
+                    document.getElementById("reschedule-date").value = formattedDate;
+                    document.getElementById("reschedule-time").value = appointment_time; // Set the time directly
+
+                })
+                .catch(error => console.error('Error fetching appointment details:', error));
+
+            modal.style.display = "block";
+            document.getElementById("submit-date-time").onclick = () => submitReschedule(appointmentId);
+        }
+
+
+        function closeRescheduleModal() {
+            const modal = document.getElementById("reschedule-modal");
+            modal.style.display = "none";
+        }
+
+        function downloadCSV(csv, filename) {
+            const csvFile = new Blob([csv], { type: 'text/csv' });
+            const downloadLink = document.createElement('a');
+
+            downloadLink.download = filename;
+            downloadLink.href = window.URL.createObjectURL(csvFile);
+            downloadLink.style.display = 'none';
+
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+        }
+
+        function exportTableToCSV(filename) {
+            const password = prompt("Please enter the password to download the file:");
+
+            if (password === "genkipets") {  // Replace with your desired password
+                const csv = [];
+                const table = document.querySelector(".appointment-table");
+                const rows = table.querySelectorAll("tr");
+
+                // Process the header row
+                const headerRow = table.querySelector("thead tr");
+                const headerCols = headerRow.querySelectorAll("th");
+                const headerData = [];
+
+                headerCols.forEach((col, index) => {
+                    // Skip the Action column
+                    if (index === headerCols.length - 1) return;
+
+                    headerData.push(col.innerText);
+                });
+
+                csv.push(headerData.join(","));
+
+                // Process the data rows
+                rows.forEach((row, rowIndex) => {
+                    // Skip the header row (already processed)
+                    if (rowIndex === 0) return;
+
+                    const rowData = [];
+                    const cols = row.querySelectorAll("td");
+
+                    cols.forEach((col, colIndex) => {
+                        // Skip the Action column
+                        if (colIndex === cols.length - 1) return;
+
+                        let cellData = col.innerText;
+
+                        // If the cell data contains a comma, enclose it in quotes
+                        if (cellData.includes(',')) {
+                            cellData = `"${cellData}"`;
+                        }
+
+                        rowData.push(cellData);
+                    });
+
+                    csv.push(rowData.join(","));
+                });
+
+                downloadCSV(csv.join("\n"), filename);
+            } else {
+                alert("Incorrect password. The file cannot be downloaded.");
+            }
+        }
+
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Main Page - Superadmin</title>
+    <link rel="stylesheet" href="../styles.css">
+    <style>
+        .sidebar {
+            background-color: #433400;
+            color: white;
+            padding: 20px;
+            height: 100vh;
+            width: 20%;
+            /* Set sidebar height to 100% of viewport height */
+            position: fixed;
+            left: 0;
+            top: 0;
+            overflow-y: auto;
+            /* Enable vertical scrolling if content exceeds viewport height */
+        }
+
+        .sidebar h2 {
+            margin-bottom: 20px;
+        }
+
+        .sidebar ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar li {
+            margin-bottom: 10px;
+        }
+
+        .sidebar a {
+            display: block;
+            /* Make links fill entire width of sidebar */
+            text-decoration: none;
+            color: white;
+            padding: 10px;
+            /* Add padding for better clickability */
+        }
+
+        .sidebar a:hover {
+            background-color: #555;
+            /* Change background color on hover */
+        }
+
+        .content {
+            flex: 1;
+            padding: 40px;
+            margin-left: 300px;
+            /* Adjust margin to account for sidebar width */
+        }
+
+        .content button {
+            background-color: #7a6000;
+            color: #fff;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: auto;
+            /* Change width to auto */
+            margin-top: 20px;
+            display: inline-block;
+            /* Ensure the button is inline-block */
+        }
+
+        .header {
+            background-color: #7a6000;
+            color: white;
+            padding: 10px 20px;
+            margin-bottom: 20px;
+        }
+
+        .header h2 {
+            color: aliceblue;
+        }
+
+        .logout-btn {
+            background-color: #820b03;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+            /* Add margin to separate logout button from tabs */
+        }
+
+        .logout-btn:hover {
+            background-color: #d32f2f;
+        }
+
+        /* Style for tabs */
+        .tab {
+            overflow: hidden;
+            border: 1px solid #ccc;
+            background-color: #f1f1f1;
+            margin-top: 20px;
+            /* Add margin to separate tabs from header */
+        }
+
+        .tab .tablinks {
+            background-color: inherit;
+            display: block;
+            /* Make buttons fill entire width of tab container */
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: background-color 0.3s ease;
+            width: 100%;
+            /* Ensure buttons fill entire width of tab container */
+            text-align: left;
+            /* Align text to the left */
+            color: #333;
+            /* Set text color for tab links */
+        }
+
+        .tab .tablinks:hover {
+            background-color: #ddd;
+        }
+
+        .tab .tablinks.active {
+            background-color: #7a6000;
+            color: #fff;
+            /* Set text color for active tab */
+        }
+
+        /* Logs container styles */
+        .logs-container {
+            margin-top: 20px;
+            /* Adjust as needed */
+        }
+
+        .logs-container h2 {
+            margin-bottom: 10px;
+            /* Add some space below the heading */
+        }
+
+        /* Logs table styles */
+        .logs-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .logs-table th,
+        .logs-table td {
+            padding: 8px;
+            border: 1px solid #000000;
+            text-align: left;
+        }
+
+        .logs-table th {
+            background-color: #aeaeae;
+            color: #fff;
+            /* Light text color for contrast */
+        }
+
+        .logs-table tbody tr:nth-child(odd) {
+            background-color: #f5f5f5;
+            /* Zebra striping for odd rows */
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container-fluid">
+
+        <!-- Sidebar and Main content -->
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <div class="header">
+                    <h2 id="welcome-message">Welcome, [User]</h2>
+                    <button id="logout-btn" class="logout-btn">Logout</button>
+                </div>
+
+                <div class="tab">
+                    <a class="tablinks" href="main-superadmin.html">HOME</a>
+                    <a class="tablinks" href="manage-accounts.html">MANAGE ACCOUNTS</a>
+                    <a class="tablinks" href="manage-products.html">MANAGE SHOP</a>
+                    <a class="tablinks" href="manage-page-content.html">MANAGE PAGE CONTENT</a>
+                    <a class="tablinks active" href="manage-his-logs.html">EVENT LOGS</a>
+                </div>
+            </div>
+
+            <div class="content">
+                <div class="logs-container">
+                    <h2>Event Logs <button onclick="promptPasswordForExport()">Export</button></h2>
+                    <div class="table-container">
+                        <table class="logs-table">
+                            <thead>
+                                <tr>
+                                    <th>Timestamp</th>
+                                    <th>Username</th>
+                                    <th>Table</th>
+                                    <th>Action</th>
+                                    <th>Details</th>
+                                </tr>
+                            </thead>
+                            <tbody id="logs-table-body">
+                                <!-- Log entries will be dynamically added here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- JavaScript -->
+    <script>
+        // For sidebar username
+        fetch('/current-user')
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('Failed to fetch user data');
+                }
+            })
+            .then(data => {
+                // Update UI to display current user's information
+                const welcomeMessage = document.getElementById('welcome-message');
+                welcomeMessage.textContent = `Welcome, ${data.user.username}`;
+            })
+            .catch(error => {
+                console.error('Error fetching user data:', error);
+            });
+
+
+        // For logout button
+        document.getElementById('logout-btn').addEventListener('click', function () {
+            // Display a confirmation dialog
+            const confirmed = confirm('Are you sure you want to logout?');
+            if (!confirmed) {
+                return; // Do nothing if the user cancels the logout
+            }
+
+            // Perform logout via AJAX
+            fetch('/logout', {
+                method: 'POST'
+            })
+                .then(response => {
+                    if (response.ok) {
+                        // Redirect to login page after successful logout
+                        window.location.href = '/login.html';
+                    } else {
+                        console.error('Logout failed:', response.statusText);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error during logout:', error);
+                });
+        });
+
+        document.addEventListener("DOMContentLoaded", () => {
+            fetch('/api/logs')
+                .then(response => response.json())
+                .then(logs => populateLogsTable(logs))
+                .catch(error => console.error('Error fetching logs:', error));
+        });
+
+        function populateLogsTable(logs) {
+            const tableBody = document.getElementById("logs-table-body");
+            tableBody.innerHTML = "";
+
+            logs.forEach(log => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+            <td>${log.timestamp}</td>
+            <td>${log.admin_username}</td>
+            <td>${log.table_name}</td>
+            <td>${log.action}</td>
+            <td>${log.details}</td>
+        `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        function promptPasswordForExport() {
+            const password = prompt("Please enter the password for export:");
+            // Check if password is correct
+            if (password === "genkipets") {
+                exportTableToCSV();
+            } else {
+                alert("Incorrect password. Export canceled.");
+            }
+        }
+
+        function exportTableToCSV() {
+            const rows = document.querySelectorAll('table tr');
+            let csvContent = "data:text/csv;charset=utf-8,";
+
+            // Add headers
+            const headers = Array.from(rows[0].querySelectorAll('th')).map(header => header.innerText);
+            csvContent += headers.join(",") + "\n";
+
+            // Add rows
+            rows.forEach(row => {
+                const rowData = Array.from(row.querySelectorAll('td')).map(cell => cell.innerText);
+                csvContent += rowData.join(",") + "\n";
+            });
+
+            // Create a link element to trigger the download
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement('a');
+            link.setAttribute('href', encodedUri);
+            link.setAttribute('download', 'event_logs.csv');
+            document.body.appendChild(link);
+
+            // Trigger the download
+            link.click();
+        }
+
+
+    </script>
+
+</body>
+
+</html>

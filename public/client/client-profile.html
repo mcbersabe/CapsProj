@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client Homepage</title>
+    <style>
+        /* Reset styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Global styles */
+        body {
+            background-image: url('../images/bg3.jpg');
+            /* Adjust the path as necessary */
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            background-repeat: no-repeat;
+
+            /* Create an overlay to achieve the opacity effect */
+            position: relative;
+            z-index: 1;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('images/genki_bg.jpeg');
+            /* Adjust the path as necessary */
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            background-repeat: no-repeat;
+            opacity: 0.9;
+            z-index: -1;
+        }
+
+
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+
+        /* Header styles */
+        header {
+            background-color: #7a6000;
+            color: #fff;
+            padding: 20px 0;
+            position: fixed;
+            text-align: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+        }
+
+        .user-details button {
+            padding: 10px 20px;
+            background-color: #644e00;
+            color: #fafafa;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            /* Smooth transition for hover effect */
+        }
+
+        .user-details {
+            float: right;
+        }
+
+        .user-details a {
+            color: #fff;
+            text-decoration: none;
+            padding: 20px 0px;
+            border-radius: 10px;
+        }
+
+
+        .user-details button:hover {
+            background-color: #644e00;
+            color: #adadad;
+        }
+
+
+        nav ul {
+            float: left;
+            list-style: none;
+        }
+
+        nav ul li {
+            display: inline;
+            margin-left: 20px;
+        }
+
+        nav ul li a {
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .content {
+            padding-top: 300px;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+
+        }
+
+        .user-info {
+            margin-bottom: 20px;
+        }
+
+        .user-detail {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 60%;
+            margin: 50px auto;
+            /* Center the container horizontally */
+            margin-top: 100px;
+            /* Add some space from the top */
+        }
+
+        .user-detail table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .user-detail table td {
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .user-detail h2 {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="main-client.html">Home</a></li>
+                <li><a href="client-appointments.html">Appointments</a></li>
+                <li><a href="#shop">Shop</a></li>
+                <li><a href="#petcare">Pet Care</a></li>
+                <li><a href="#profile" id="clientUsername">Welcome, [User]</a></li>
+                <li>
+                    <div class="user-details">
+                        <button id="logout-btn" class="logout-btn">Logout</button>
+                    </div>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="content">
+        <h1>User Details</h1>
+        <div class="user-detail">
+            <h2>User Details</h2>
+            <table>
+                <tr>
+                    <td>User ID:</td>
+                    <td><span id="userId"></span></td>
+                </tr>
+                <tr>
+                    <td>Full Name:</td>
+                    <td><span id="userFullname"></span></td>
+                </tr>
+                <tr>
+                    <td>Email:</td>
+                    <td><span id="userEmail"></span></td>
+                </tr>
+                <tr>
+                    <td>Username:</td>
+                    <td><span id="userUsername"></span></td>
+                </tr>
+                <tr>
+                    <td>Role ID:</td>
+                    <td><span id="userRoleId"></span></td>
+                </tr>
+                <tr>
+                    <td>Created At:</td>
+                    <td><span id="userCreatedAt"></span></td>
+                </tr>
+            </table>
+        </div>
+
+    </div>
+
+    <script>
+        fetch('/current-user')
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('Failed to fetch user data');
+                }
+            })
+            .then(data => {
+                // Update UI to display current user's information
+                const welcomeMessage = document.getElementById('clientUsername');
+                welcomeMessage.textContent = `Welcome, ${data.user.username}`;
+            })
+            .catch(error => {
+                console.error('Error fetching user data:', error);
+            });
+
+        // For logout button
+        document.getElementById('logout-btn').addEventListener('click', function () {
+            // Display a confirmation dialog
+            const confirmed = confirm('Are you sure you want to logout?');
+            if (!confirmed) {
+                return; // Do nothing if the user cancels the logout
+            }
+
+            // Perform logout via AJAX
+            fetch('/logout', {
+                method: 'POST'
+            })
+                .then(response => {
+                    if (response.ok) {
+                        // Redirect to login page after successful logout
+                        window.location.href = '/login.html';
+                    } else {
+                        console.error('Logout failed:', response.statusText);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error during logout:', error);
+                });
+        });
+
+        fetch('/user-details')
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('Failed to fetch user details');
+                }
+            })
+            .then(data => {
+                // Update UI to display user details
+                const userDetails = data.user;
+                document.getElementById('userId').textContent = userDetails.id;
+                document.getElementById('userFullname').textContent = userDetails.fullname;
+                document.getElementById('userEmail').textContent = userDetails.email;
+                document.getElementById('userUsername').textContent = userDetails.username;
+                document.getElementById('userRoleId').textContent = userDetails.role_id;
+                document.getElementById('userCreatedAt').textContent = userDetails.created_at;
+            })
+            .catch(error => {
+                console.error('Error fetching user details:', error);
+            });
+
+    </script>
+</body>
+
+</html>

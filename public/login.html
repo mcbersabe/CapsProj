@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Login Page</title>
+</head>
+<body>
+    <div class="background-container">
+        <div class="login-container">
+            <form class="login-form">
+                <div class="back-to-home">
+                    <a href="homepage.html">back to home</a>
+                </div>
+                <h2>Login</h2>
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
+                
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+                
+                <button type="submit">Login</button>
+            </form>
+            <p>Don't have an account? <a href="signup.html">Create one</a></p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const loginForm = document.querySelector('.login-form');
+
+            loginForm.addEventListener('submit', function (event) {
+                event.preventDefault();
+
+                // Get input values
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+
+                // Send POST request to server
+                fetch('/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Invalid username or password');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Redirect based on user role_id
+                    switch (data.role_id) {
+                        case 1:
+                            window.location.href = '/superadmin/main-superadmin.html';
+                            break;
+                        case 2:
+                            window.location.href = '/scheduleadmin/main-schedadmin.html';
+                            break;
+                        case 3:
+                            window.location.href = '/shopadmin/main-shopadmin.html';
+                            break;
+                        case 4:
+                            window.location.href = '/client/main-client.html';
+                            break;
+                        default:
+                            throw new Error('Invalid role_id');
+                    }
+                })
+                .catch(error => {
+                    console.error('Login error:', error.message);
+                    alert(error.message);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

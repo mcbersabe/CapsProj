@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Website</title>
+
+</head>
+
+<body>
+    <header>
+        <div class="container">
+            <nav>
+                <ul>
+                    <li><a href="#">Home</a></li>
+                    <li><a href="#homepage">About</a></li>
+                    <li><a href="#about-contact">Contact</a></li>
+                </ul>
+            </nav>
+            <div class="login">
+                <a href="login.html">Login</a>
+                <a href="signup.html">Signup</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="welcome-section">
+        <div class="welcome-text">
+            <h1>Welcome to GenkiPets VetSched</h1>
+            <p>Providing best care for your pets</p>
+            <button onclick="location.href='login.html'">Schedule an Appointment</button>
+        </div>
+        <div class="welcome-logo">
+            <img src="images/genki_logo.png" alt="Company Logo">
+        </div>
+    </div>
+    <div class="section" id="homepage">
+        <h2> GenkiPets: Your Partner in Pet Wellness</h2>
+
+        <p> At GenkiPets, we're passionate about providing exceptional veterinary care for dogs and cats.
+            Our friendly and experienced team is dedicated to ensuring your furry companions live long, healthy, and
+            happy lives.</p>
+    </div>
+    <div class="section" id="shop-products">
+        <h2>Our Products</h2>
+        <p>Check out our shop for the latest products.</p>
+        <div class="shop-section">
+            <div class="product">
+                <a href="login.html">
+                    <img src="images/p1.jpg" alt="Snow white 1l">
+                    <h3>Snow white 1l</h3>
+                    <p>Price: P 390</p>
+                </a>
+            </div>
+            <div class="product">
+                <a href="login.html">
+                    <img src="images/p2.jpg" alt="Snow white 250ml">
+                    <h3>Snow white 250ml</h3>
+                    <p>Price: P 160</p>
+                </a>
+            </div>
+            <div class="product">
+                <a href="login.html">
+                    <img src="images/p3.jpg" alt="Fluff machine 1l">
+                    <h3>Fluff machine 1l</h3>
+                    <p>Price: P 440</p>
+                </a>
+            </div>
+            <div class="product">
+                <a href="login.html">
+                    <img src="images/p4.jpg" alt="Fluff machine 250ml">
+                    <h3>Fluff machine 250ml</h3>
+                    <p>Price: P 170</p>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="section" id="about-contact">
+        <h2>Join the GenkiPets Family</h2>
+        <p>Schedule an appointment today and let us help your pet live a happy and healthy life!</p>
+
+        <h3>Contact Us</h3>
+        <p>Have any questions? Get in touch with us through our facebook page GenkiPets Veterinary Clinic.</p>
+    </div>
+    <footer class="footer">
+        <p>All rights reserved &copy; 2024</p>
+    </footer>
+
+    <style>
+        /* Reset styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Global styles */
+        body {
+            background-image: url('images/bg2.jpg');
+            /* Adjust the path as necessary */
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            background-repeat: no-repeat;
+            /* Create an overlay to achieve the opacity effect */
+            position: relative;
+            z-index: 1;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+    
+            /* Adjust the path as necessary */
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            background-repeat: no-repeat;
+            opacity: 0.9;
+            z-index: -1;
+        }
+
+
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+
+        /* Header styles */
+        header {
+            background-color: #7a6000 ;
+            color: #fff;
+            padding: 20px 0;
+            position: fixed;
+            text-align: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+        }
+
+        .logo {
+            float: left;
+        }
+
+        .logo img {
+            height: 40px;
+        }
+
+        nav ul {
+            float: left;
+            list-style: none;
+        }
+
+        nav ul li {
+            display: inline;
+            margin-left: 20px;
+        }
+
+        nav ul li a {
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .login {
+            float: right;
+        }
+
+        .login a {
+            color: #fff;
+            text-decoration: none;
+            padding: 20px 20px;
+            border-radius: 10px;
+        }
+
+        .login a:hover {
+            background-color: #644e00;
+            color: #adadad;
+        }
+
+        /* Hero section styles */
+        .hero {
+            background-image: url('hero-background.jpg');
+            background-size: cover;
+            color: #fff;
+            padding: 100px 0;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 3em;
+        }
+
+        /* Content section styles */
+        .content {
+            padding: 50px 0;
+            text-align: center;
+        }
+
+        .welcome-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background-color: #f9f9f917;
+            margin: 10px;
+            margin-bottom: 20px;
+            margin-top: 6%;
+        }
+
+        .welcome-section h1, .welcome-section p, .welcome-section button {
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Adding shadow to text */
+        }
+
+        .welcome-text {
+            width: 50%;
+        }
+
+        .welcome-text h1 {
+            font-size: 76px;
+            color: #ffffff;
+            margin: 0;
+        }
+
+        .welcome-text p {
+            font-size: 18px;
+            color: #ffffff;
+            margin: 10px 0;
+        }
+
+        .welcome-text button {
+            background-color: #8f7928;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .welcome-text button:hover {
+            background-color: #a07e00;
+        }
+
+        .welcome-logo {
+            width: 50%;
+            text-align: center;
+        }
+
+        .welcome-logo img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .section {
+            padding: 20px;
+            margin: 10px;
+            border: 1px solid #ddd;
+            background-color: #f9f9f9ea;
+        }
+
+        .shop-section {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+
+        .product {
+            border: 1px solid #dddddd;
+            padding: 10px;
+            margin: 10px;
+            width: calc(25% - 40px);
+            box-sizing: border-box;
+            text-align: center;
+            transition: background-color 0.2s ease-in-out;
+        }
+
+        .product:hover {
+            background-color: #e3c635;
+            cursor: pointer;
+        }
+
+        .product a {
+            /* Style anchor elements within product */
+            text-decoration: none;
+            /* Remove underline */
+            color: black;
+            /* Set text color to black */
+        }
+
+        .product img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 10px;
+            background-color: #5e3800;
+            color: white;
+
+            width: 100%;
+            bottom: 0;
+        }
+    </style>
+
+</body>
+
+</html>

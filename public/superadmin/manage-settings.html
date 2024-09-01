@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+        }
+        input[type="text"], select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        input[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>Settings</h1>
+    <form action="#" method="post">
+        <label for="timezone">Time Zone:</label>
+        <select name="timezone" id="timezone">
+            <option value="gmt">GMT</option>
+            <option value="est">EST</option>
+            <option value="pst">PST</option>
+            <!-- Add more timezones here -->
+        </select>
+
+        <label for="dateformat">Date Format:</label>
+        <select name="dateformat" id="dateformat">
+            <option value="mmddyy">MM/DD/YY</option>
+            <option value="ddmmyy">DD/MM/YY</option>
+            <!-- Add more date formats here -->
+        </select>
+
+        <label for="appointmentduration">Default Appointment Duration (minutes):</label>
+        <input type="text" id="appointmentduration" name="appointmentduration" placeholder="Enter duration...">
+
+        <label for="adminpermissions">Admin Permissions:</label>
+        <input type="text" id="adminpermissions" name="adminpermissions" placeholder="Enter permissions...">
+
+        <label for="clientpermissions">Client Permissions:</label>
+        <input type="text" id="clientpermissions" name="clientpermissions" placeholder="Enter permissions...">
+
+        <label for="reminder">Appointment Reminder (minutes before):</label>
+        <input type="text" id="reminder" name="reminder" placeholder="Enter reminder...">
+
+        <label for="firewall">Firewall Settings:</label>
+        <input type="text" id="firewall" name="firewall" placeholder="Enter firewall settings...">
+
+        <label for="backup">Backup Frequency:</label>
+        <input type="text" id="backup" name="backup" placeholder="Enter backup frequency...">
+
+        <input type="submit" value="Save Settings">
+    </form>
+</body>
+</html>

@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appointments</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Global styles */
+        body {
+            background-image: url('../images/bg5.jpg');
+            /* Adjust the path as necessary */
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            background-repeat: no-repeat;
+
+            /* Create an overlay to achieve the opacity effect */
+            position: relative;
+            z-index: 1;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('images/genki_bg.jpeg');
+            /* Adjust the path as necessary */
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            background-repeat: no-repeat;
+            opacity: 0.9;
+            z-index: -1;
+        }
+
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+
+        header {
+            background-color: #7a6000;
+            color: #fff;
+            padding: 20px 0;
+            position: fixed;
+            text-align: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+        }
+
+        .user-details button {
+            padding: 10px 20px;
+            background-color: #644e00;
+            color: #fafafa;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            /* Smooth transition for hover effect */
+        }
+
+        .user-details {
+            float: right;
+        }
+
+        .user-details a {
+            color: #fff;
+            text-decoration: none;
+            padding: 20px 0px;
+            border-radius: 10px;
+        }
+
+
+        .user-details button:hover {
+            background-color: #644e00;
+            color: #adadad;
+        }
+
+
+        nav ul {
+            float: left;
+            list-style: none;
+        }
+
+        nav ul li {
+            display: inline;
+            margin-left: 20px;
+        }
+
+        nav ul li a {
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .section {
+
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background-color: #f9f9f9c9;
+            margin: 10px;
+            margin-bottom: 20px;
+            margin-top: 6%;
+        }
+
+        form {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+        }
+
+        form input[type="text"],
+        form input[type="date"],
+        form input[type="time"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+
+        form textarea {
+            width: 100%;
+            height: 100px;
+            padding: 10px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+
+        form label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .purpose-checkboxes {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+
+        .purpose-checkboxes div {
+            width: 45%;
+        }
+
+        form button {
+            background-color: #8f7928;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        form button:hover {
+            background-color: #a07e00;
+        }
+
+        .species-div {
+            margin-bottom: 20px;
+        }
+
+        select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%204%205%22%3E%3Cpath%20fill%3D%22%23333%22%20d%3D%22M2%200L0%202h4L2%200zM0%203h4L2%205%200%203z%22/%3E%3C/svg%3E') no-repeat right 10px center;
+            background-color: #fff;
+            background-size: 10px 5px;
+        }
+
+        select:required:invalid {
+            color: gray;
+        }
+
+        option {
+            color: black;
+        }
+
+        .appointment-section {
+            max-width: 600px;
+            margin: 20px auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid #ddd;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            text-align: left;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="main-client.html">Home</a></li>
+                <li><a href="client-appointments.html">Appointments</a></li>
+                <li><a href="#shop">Shop</a></li>
+                <li><a href="#petcare">Pet Care</a></li>
+                <li><a href="client-profile.html" id="clientUsername">Welcome, [User]</a></li>
+                <li>
+                    <div class="user-details">
+                        <button id="logout-btn" class="logout-btn">Logout</button>
+                    </div>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="section">
+        <h2>Schedule an Appointment</h2>
+        <form id="appointmentForm" class="appointment-form">
+            <label for="pet-name">Pet Name:</label>
+            <input type="text" id="pet-name" name="pet-name" required>
+
+            <div class="species-div">
+                <label for="species">Species:</label>
+                <select id="species" name="species" required>
+                    <option value="" disabled selected>Select a species</option>
+                    <option value="Cat">Cat</option>
+                    <option value="Dog">Dog</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+
+
+            <label for="date">Date:</label>
+            <input type="date" id="date" name="date" required>
+
+            <label for="time">Time:</label>
+            <select id="time" name="time" required>
+                <option value="9:00:00">9:00 AM</option>
+                <option value="10:00:00">10:00 AM</option>
+                <option value="11:00:00">11:00 AM</option>
+                <option value="12:00:00">12:00 AM</option>
+                <option value="13:00:00">1:00 PM</option>
+                <option value="14:00:00">2:00 PM</option>
+                <option value="15:00:00">3:00 PM</option>
+                <option value="16:00:00">4:00 PM</option>
+            </select>
+
+            <label for="purpose">Purpose:</label>
+            <div class="purpose-checkboxes">
+                <div>
+                    <input type="checkbox" id="service1" name="purpose" value="S1">
+                    <label for="service1">Full Groom</label><br>
+                    <input type="checkbox" id="service2" name="purpose" value="S2">
+                    <label for="service2">Basic Groom</label><br>
+                    <input type="checkbox" id="service3" name="purpose" value="S3">
+                    <label for="service3">Nail Trim</label><br>
+                    <input type="checkbox" id="service4" name="purpose" value="S4">
+                    <label for="service4">Ear Clean</label><br>
+                    <input type="checkbox" id="service5" name="purpose" value="S5">
+                    <label for="service5">Face Trim</label><br>
+                </div>
+                <div>
+                    <input type="checkbox" id="service6" name="purpose" value="S6">
+                    <label for="service6">Paw Trim</label><br>
+                    <input type="checkbox" id="service7" name="purpose" value="S7">
+                    <label for="service7">Shower & Blow Dry</label><br>
+                    <input type="checkbox" id="service8" name="purpose" value="S8">
+                    <label for="service8">Toothbrush</label><br>
+                    <input type="checkbox" id="service9" name="purpose" value="S9">
+                    <label for="service9">Anal Sac Clean</label><br>
+                </div>
+            </div>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+    <div class="section appointment-section">
+        <h2>Upcoming Appointments</h2>
+        <div class="upcoming-appointments">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Pet Name</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="upcoming-appointments-body">
+                    <!-- Upcoming appointments will be loaded here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="section appointment-section">
+        <h2>Past Appointments</h2>
+        <div class="past-appointments">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Pet Name</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="past-appointments-body">
+                    <!-- Past appointments will be loaded here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        fetch('/current-user')
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('Failed to fetch user data');
+                }
+            })
+            .then(data => {
+                // Update UI to display current user's information
+                const welcomeMessage = document.getElementById('clientUsername');
+                welcomeMessage.textContent = `Welcome, ${data.user.username}`;
+                // Load appointments once the user is known
+                loadAppointments();
+            })
+            .catch(error => {
+                console.error('Error fetching user data:', error);
+            });
+
+        document.getElementById('appointmentForm').addEventListener('submit', async function (event) {
+            event.preventDefault();
+
+            const petName = document.getElementById('pet-name').value;
+            const species = document.getElementById('species').value;
+            const date = document.getElementById('date').value;
+            const time = document.getElementById('time').value;
+            const purposes = Array.from(document.querySelectorAll('input[name="purpose"]:checked')).map(checkbox => checkbox.value);
+
+            const response = await fetch('/current-user');
+            const userData = await response.json();
+            const userId = userData.user.id; // Get user_id from the response
+
+            const appointmentCheckResponse = await fetch('/check-appointment', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ date, time, userId }) // Pass user_id to check for existing appointments
+            });
+
+            const result = await appointmentCheckResponse.json();
+
+            if (!result.valid) {
+                alert(result.message);
+                return;
+            }
+
+            const pendingResponse = await fetch('/check-pending-appointments', {
+                method: 'GET'
+            });
+
+            const pendingResult = await pendingResponse.json();
+
+            if (pendingResult.count >= 10) {
+                alert('You already have 10 pending appointments. Wait for confirmation or cancel them before scheduling a new one.');
+                return;
+            }
+
+            const appointmentResponse = await fetch('/create-appointment', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ petName, species, date, time, purposes, userId }) // Pass user_id to create appointment
+            });
+
+            if (appointmentResponse.ok) {
+                alert('Appointment scheduled successfully!');
+                location.reload();
+            } else {
+                alert('Failed to schedule appointment. Please try again.');
+            }
+        });
+
+
+        function formatDate(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function loadAppointments() {
+            fetch('/get-appointments')
+                .then(response => response.json())
+                .then(data => {
+                    const upcomingAppointments = data.filter(appointment => appointment.status === 'Pending' || appointment.status === 'Confirmed');
+                    const pastAppointments = data.filter(appointment => appointment.status === 'Completed' || appointment.status === 'Cancelled');
+
+                    const upcomingTableBody = document.getElementById('upcoming-appointments-body');
+                    upcomingTableBody.innerHTML = '';
+
+                    upcomingAppointments.forEach(appointment => {
+                        const appointmentDate = new Date(appointment.appointment_date);
+                        const formattedDate = formatDate(appointmentDate);
+
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${appointment.pet_name}</td>
+                            <td>${formattedDate}</td>
+                            <td>${appointment.status}</td>
+                            <td><button onclick="cancelAppointment(${appointment.id})">Cancel</button></td>
+                        `;
+                        upcomingTableBody.appendChild(row);
+                    });
+
+                    const pastTableBody = document.getElementById('past-appointments-body');
+                    pastTableBody.innerHTML = '';
+
+                    pastAppointments.forEach(appointment => {
+                        const appointmentDate = new Date(appointment.appointment_date);
+                        const formattedDate = formatDate(appointmentDate);
+
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                        <td>${appointment.pet_name}</td>
+                        <td>${formattedDate}</td>
+                        <td>${appointment.status}</td>
+                    `;
+                        pastTableBody.appendChild(row);
+                    });
+                })
+                .catch(error => console.error('Error fetching appointments:', error));
+        }
+
+
+        function cancelAppointment(id) {
+            // Display a confirmation dialog
+            if (confirm('Are you sure you want to cancel this appointment?')) {
+                // If user confirms, send cancellation request
+                fetch(`/cancel-appointment/${id}`, { method: 'POST' })
+                    .then(response => {
+                        if (response.ok) {
+                            loadAppointments();
+                        } else {
+                            alert('Failed to cancel appointment. Please try again.');
+                        }
+                    });
+            } else {
+                // If user cancels, do nothing
+                console.log('Appointment cancellation canceled.');
+            }
+        }
+
+
+        window.onload = loadAppointments;
+
+        // For logout button
+        document.getElementById('logout-btn').addEventListener('click', function () {
+            // Display a confirmation dialog
+            const confirmed = confirm('Are you sure you want to logout?');
+            if (!confirmed) {
+                return; // Do nothing if the user cancels the logout
+            }
+
+            // Perform logout via AJAX
+            fetch('/logout', {
+                method: 'POST'
+            })
+                .then(response => {
+                    if (response.ok) {
+                        // Redirect to login page after successful logout
+                        window.location.href = '/login.html';
+                    } else {
+                        console.error('Logout failed:', response.statusText);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error during logout:', error);
+                });
+        });
+    </script>
+</body>
+
+</html>

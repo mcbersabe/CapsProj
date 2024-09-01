@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Client Sign Up</title>
+</head>
+
+<body>
+    <div class="background-container">
+        <div class="signup-container">
+            <form action="#" method="post" class="signup-form" onsubmit="return signup()">
+                <div class="back-to-home">
+                    <a href="homepage.html">back to home</a>
+                </div>
+                <h2>Sign Up</h2>
+                <div class="logo-container"></div>
+                <label for="fullname">Full Name: (Last Name, First Name MI.)</label>
+                <input type="text" id="fullname" name="fullname" required>
+
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
+
+                <div class="password-container">
+                    <label for="password">Password:</label>
+                    <div class="password-input">
+                        <input type="password" id="password" name="password" required>
+                        <img src="images/closed-eye.png" alt="Toggle Password Visibility" class="toggle-password">
+                    </div>
+                </div>
+
+                <div class="password-container">
+                    <label for="confirm-password">Confirm Password:</label>
+                    <div class="password-input">
+                        <input type="password" id="confirm-password" name="confirm-password" required>
+                        <img src="images/closed-eye.png" alt="Toggle Password Visibility" class="toggle-password">
+                    </div>
+                </div>
+
+                <div class="consent-checkboxes">
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="terms" name="terms" required>
+                        <label for="terms">I agree to the <a href="#">Terms of Service</a></label>
+                    </div>
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="privacy-policy" name="privacy-policy" required>
+                        <label for="privacy-policy">I agree to the <a href="#">Privacy Policy</a></label>
+                    </div>
+                </div>
+
+                <button type="submit">Sign Up</button>
+            </form>
+            <p>Already have an account? <a href="login.html">Login here</a></p>
+        </div>
+    </div>
+
+    <script>
+        // JavaScript for toggling password visibility
+        document.querySelectorAll('.toggle-password').forEach(function (icon) {
+            icon.addEventListener('click', function () {
+                var passwordInput = this.previousElementSibling;
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    this.src = 'images/open-eye.png';
+                } else {
+                    passwordInput.type = 'password';
+                    this.src = 'images/closed-eye.png';
+                }
+            });
+        });
+
+        function signup() {
+            // Get input values
+            var fullname = document.getElementById('fullname').value;
+            var email = document.getElementById('email').value;
+            var username = document.getElementById('username').value;
+            var password = document.getElementById('password').value;
+            var confirmPassword = document.getElementById('confirm-password').value;
+            var termsChecked = document.getElementById('terms').checked;
+            var privacyPolicyChecked = document.getElementById('privacy-policy').checked;
+
+            // Validate username
+            if (!isValidUsername(username)) {
+                alert("Username must be 6 to 10 characters long and contain only letters and numbers.");
+                return false; // Prevent form submission
+            }
+
+            // Validate password strength
+            if (!isStrongPassword(password)) {
+                alert("Password must be at least 8 characters long and include an uppercase letter, a lowercase letter, a number, and a special character.");
+                return false; // Prevent form submission
+            }
+
+            // Check if passwords match and checkboxes are checked
+            if (password !== confirmPassword || !termsChecked || !privacyPolicyChecked) {
+                alert("Please make sure passwords match and agree to the terms.");
+                return false; // Prevent form submission
+            }
+
+            // Prepare data object to be sent to the server
+            var formData = {
+                fullname: fullname,
+                email: email,
+                username: username,
+                password: password
+            };
+
+            // Send AJAX request to the server
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/signup', true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    if (xhr.status === 201) {
+                        // Signup successful, redirect to login page
+                        console.log('Signup successful');
+                        window.location.href = 'login.html';
+                    } else if (xhr.status === 409) {
+                        // Username or email already exists, show error message
+                        console.error('Username or email already exists');
+                        alert('Username or email already exists.');
+                    } else {
+                        // Error signing up, show generic error message
+                        console.error('Error signing up:', xhr.responseText);
+                        alert('Error signing up. Please try again.');
+                    }
+                }
+            };
+            xhr.send(JSON.stringify(formData));
+
+            return false; // Prevent form submission
+        }
+
+        // Function to validate username
+        function isValidUsername(username) {
+            var minLength = 6;
+            var maxLength = 10;
+            var validCharacters = /^[a-zA-Z0-9]+$/;
+
+            return username.length >= minLength &&
+                username.length <= maxLength &&
+                validCharacters.test(username);
+        }
+
+        // Function to validate password strength
+        function isStrongPassword(password) {
+            var minLength = 8;
+            var hasUpperCase = /[A-Z]/.test(password);
+            var hasLowerCase = /[a-z]/.test(password);
+            var hasNumbers = /\d/.test(password);
+            var hasSpecialChars = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+            return password.length >= minLength && hasUpperCase && hasLowerCase && hasNumbers && hasSpecialChars;
+        }
+
+
+
+    </script>
+</body>
+
+</html>
