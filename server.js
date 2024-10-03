@@ -1,7 +1,9 @@
 const express = require('express');
 const session = require('express-session');
+const multer = require('multer');
 const mysql = require('mysql');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const port = 3300;
@@ -22,6 +24,28 @@ db.connect((err) => {
   }
   console.log('Connected to MySQL database');
 });
+
+// Define storage for the images
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadPath = path.join(__dirname, 'pet-images');
+    if (!fs.existsSync(uploadPath)) {
+      fs.mkdirSync(uploadPath, { recursive: true });
+    }
+    cb(null, uploadPath); // Save to 'pet-images' folder
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+// Set up multer middleware for image upload
+const upload = multer({ storage: storage });
+
+// Serve static files from the 'pet-images' directory
+app.use('/pet-images', express.static(path.join(__dirname, 'pet-images')));
+app.use('/images', express.static(path.join(__dirname, 'images')));
 
 // Middleware to enable session management
 app.use(session({
@@ -527,6 +551,7 @@ app.put('/api/appointments/:id/reschedule', (req, res) => {
 
 //For manage-sched-data
 // Route to fetch all appointments
+/*
 app.get('/api/appointments', (req, res) => {
   // Query to fetch all appointments from the database
   const sql = 'SELECT a.*, u.username AS owner_username FROM appointments a LEFT JOIN users u ON a.user_id = u.id';
@@ -549,6 +574,61 @@ app.get('/api/appointments', (req, res) => {
     res.json(results);
   });
 });
+*/
+
+// Route to fetch appointment summary (total and confirmed) for each date
+app.get('/api/appointments', (req, res) => {
+  const sql = `
+    SELECT 
+      a.appointment_date AS appointment_date,
+      COUNT(*) AS total_appointments,
+      SUM(CASE WHEN a.status = 'confirmed' THEN 1 ELSE 0 END) AS confirmed_appointments
+    FROM appointments a 
+    LEFT JOIN users u ON a.user_id = u.id
+    GROUP BY a.appointment_date
+  `;
+
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error('Error fetching appointments:', err);
+      res.status(500).json({ error: 'Internal server error' });
+      return;
+    }
+
+    const appointments = results.map(appointment => ({
+      date: appointment.appointment_date,
+      total: appointment.total_appointments,
+      confirmed: appointment.confirmed_appointments
+    }));
+
+    res.json(appointments);
+  });
+});
+
+// Route to fetch appointments for a specific day (confirmed appointments only)
+app.get('/api/appointments/day/:date', (req, res) => {
+  const appointmentDate = req.params.date;
+
+  const sql = `
+    SELECT a.*, u.username AS owner_username 
+    FROM appointments a 
+    LEFT JOIN users u ON a.user_id = u.id 
+    WHERE a.appointment_date = ?
+    AND a.status = 'confirmed'
+  `;
+
+  db.query(sql, [appointmentDate], (err, results) => {
+    if (err) {
+      console.error('Error fetching appointment details for the day:', err);
+      res.status(500).json({ error: 'Internal server error' });
+      return;
+    }
+
+    res.json(results);
+  });
+});
+
+
 
 // Route to fetch appointment details by ID
 app.get('/api/appointments/:id', (req, res) => {
@@ -868,6 +948,399 @@ app.get('/user-details', (req, res) => {
     res.status(401).json({ message: 'User not logged in' });
   }
 });
+
+//appmnts
+app.get('/api/getConfirmedReservations', (req, res) => {
+  const date = req.query.date;
+  const query = `
+      SELECT COUNT(*) AS confirmedReservations
+      FROM appointments
+      WHERE appointment_date = ? AND status = 'confirmed';
+  `;
+
+  const maxReservations = 5; // Set maximum reservations per day
+
+  db.query(query, [date], (error, results) => {
+    if (error) {
+      return res.status(500).json({ error: 'Database query error' });
+    }
+
+    res.json({
+      confirmedReservations: results[0].confirmedReservations,
+      maxReservations: maxReservations
+    });
+  });
+});
+
+app.get('/api/getUserPets', (req, res) => {
+  const userId = req.session.userId; // Assuming you use session for user management
+  const query = 'SELECT * FROM pets WHERE user_id = ?';
+
+  db.query(query, [userId], (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: 'Database error' });
+    }
+    res.json(results);
+  });
+});
+
+//aproducts
+app.get('/api/products', (req, res) => {
+  let sql = 'SELECT id, name, description, price, image_url, category, stock_quantity FROM products';
+  const category = req.query.category;
+  const page = parseInt(req.query.page) || 1;  // Default to page 1
+  const limit = parseInt(req.query.limit) || 6;  // Default to 6 products per page
+  const offset = (page - 1) * limit;
+
+  // If a category is provided, add a WHERE clause to filter by category
+  if (category && category !== 'all') {
+    sql += ' WHERE category = ?';
+  }
+
+  // Add pagination with LIMIT and OFFSET
+  sql += ' LIMIT ? OFFSET ?';
+
+  const params = category && category !== 'all' ? [category, limit, offset] : [limit, offset];
+
+  db.query(sql, params, (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: 'Failed to fetch products' });
+    }
+
+    // Fetch total count for pagination
+    let countSql = 'SELECT COUNT(*) AS count FROM products';
+    if (category && category !== 'all') {
+      countSql += ' WHERE category = ?';
+    }
+
+    db.query(countSql, category && category !== 'all' ? [category] : [], (err, countResult) => {
+      if (err) {
+        return res.status(500).json({ error: 'Failed to fetch product count' });
+      }
+
+      const totalProducts = countResult[0].count;
+      const totalPages = Math.ceil(totalProducts / limit);
+
+      res.json({
+        products: results,
+        totalPages,
+        currentPage: page,
+      });
+    });
+  });
+});
+
+app.post('/api/cart/add', (req, res) => {
+  const { userId, productId, quantity } = req.body;
+
+  // Check if the item already exists in the cart
+  const query = `INSERT INTO cart (user_id, product_id, quantity) VALUES (?, ?, ?)
+                 ON DUPLICATE KEY UPDATE quantity = quantity + VALUES(quantity)`;
+  db.query(query, [userId, productId, quantity], (error, results) => {
+    if (error) {
+      return res.status(500).json({ error: 'Database error' });
+    }
+    res.status(200).json({ message: 'Item added to cart' });
+  });
+});
+
+app.get('/api/cart/:userId', (req, res) => {
+  const userId = req.params.userId;
+  const query = `SELECT c.*, p.name, p.price FROM cart c
+                 JOIN products p ON c.product_id = p.id
+                 WHERE c.user_id = ?`;
+  db.query(query, [userId], (error, results) => {
+    if (error) {
+      return res.status(500).json({ error: 'Database error' });
+    }
+    res.status(200).json(results);
+  });
+});
+
+app.put('/api/cart/update', (req, res) => {
+  const { userId, productId, quantity } = req.body;
+
+  const updateCartQuery = `UPDATE cart SET quantity = ? WHERE user_id = ? AND id = ?`;
+
+  db.query(updateCartQuery, [quantity, userId, productId], (err, result) => {
+    if (err) {
+      console.error('Error updating cart:', err);
+      return res.status(500).json({ success: false, message: 'Database update failed' });
+    }
+
+    if (result.affectedRows > 0) {
+      return res.json({ success: true, message: 'Cart item updated' });
+    } else {
+      return res.status(404).json({ success: false, message: 'Cart item not found' });
+    }
+  });
+});
+
+
+app.delete('/api/cart/remove', (req, res) => {
+  const { userId, productId } = req.body;
+  const query = `DELETE FROM cart WHERE user_id = ? AND id = ?`;
+  db.query(query, [userId, productId], (error, results) => {
+    if (error) {
+      return res.status(500).json({ error: 'Database error' });
+    }
+    res.status(200).json({ message: 'Item removed from cart' });
+  });
+});
+
+app.get('/api/cart/summary/:userId', (req, res) => {
+  const userId = req.params.userId; // Get userId from query string
+  console.log(`UserID from the backend API:${userId}`);
+  if (!userId) {
+    return res.status(400).json({ error: 'User not logged in' });
+  }
+
+  const query = `SELECT p.name, c.quantity, p.price 
+                 FROM cart c
+                 JOIN products p ON c.product_id = p.id
+                 WHERE c.user_id = ?`;
+
+  db.query(query, [userId], (error, results) => {
+    if (error) {
+      return res.status(500).json({ error: 'Database error' });
+    }
+
+    const items = results.map(item => ({
+      name: item.name,
+      quantity: item.quantity,
+      price: item.price
+    }));
+
+    const totalPrice = items.reduce((sum, item) => sum + item.quantity * item.price, 0);
+
+    res.status(200).json({ items, totalPrice });
+  });
+});
+
+app.post('/api/checkout/:userId', (req, res) => {
+  const userId = req.body.userId;
+
+  db.beginTransaction((error) => {
+    if (error) return res.status(500).json({ error: 'Transaction error' });
+
+    // Calculate total price
+    const totalQuery = `SELECT product_id, SUM(quantity) AS total_quantity, SUM(p.price * c.quantity) AS total_price
+                          FROM cart c
+                          JOIN products p ON c.product_id = p.id
+                          WHERE c.user_id = ?
+                          GROUP BY product_id`;
+    db.query(totalQuery, [userId], (error, results) => {
+      if (error) return db.rollback(() => res.status(500).json({ error: 'Error calculating total price' }));
+
+      const totalPrice = results.reduce((acc, row) => acc + row.total_price, 0);
+
+      // Insert receipt
+      const receiptQuery = `INSERT INTO receipts (user_id, total_price) VALUES (?, ?)`;
+      db.query(receiptQuery, [userId, totalPrice], (error, results) => {
+        if (error) return db.rollback(() => res.status(500).json({ error: 'Error inserting receipt' }));
+
+        const receiptId = results.insertId;
+
+        // Insert receipt items and update product quantities
+        const itemsQuery = `INSERT INTO receipt_items (receipt_id, product_id, quantity, price)
+                                  SELECT ?, product_id, quantity, price
+                                  FROM cart c
+                                  JOIN products p ON c.product_id = p.id
+                                  WHERE c.user_id = ?`;
+        db.query(itemsQuery, [receiptId, userId], (error) => {
+          if (error) return db.rollback(() => res.status(500).json({ error: 'Error inserting receipt items' }));
+
+          // Update product quantities
+          const updateProductQuantities = `UPDATE products p
+                                                   JOIN cart c ON p.id = c.product_id
+                                                   SET p.stock_quantity = p.stock_quantity - c.quantity
+                                                   WHERE c.user_id = ?`;
+          db.query(updateProductQuantities, [userId], (error) => {
+            if (error) return db.rollback(() => res.status(500).json({ error: 'Error updating product quantities' }));
+
+            // Delete items from cart
+            const deleteCartQuery = `DELETE FROM cart WHERE user_id = ?`;
+            db.query(deleteCartQuery, [userId], (error) => {
+              if (error) return db.rollback(() => res.status(500).json({ error: 'Error clearing cart' }));
+
+              db.commit((error) => {
+                if (error) return db.rollback(() => res.status(500).json({ error: 'Commit error' }));
+
+                res.status(200).json({ receiptCode: receiptId });
+              });
+            });
+          });
+        });
+      });
+    });
+  });
+});
+
+
+
+//pets
+app.get('/current-user/pets', (req, res) => {
+  const userId = req.session.userId;
+
+  if (userId) {
+    const query = 'SELECT pet_id, pet_name, pet_type, pet_breed, pet_age, pet_gender, pet_weight, pet_image, last_updated_at FROM pets WHERE user_id = ?';
+    db.query(query, [userId], (err, results) => {
+      if (err) {
+        res.status(500).json({ message: 'Internal Server Error' });
+        return;
+      }
+
+      // Construct the full URL for the pet image
+      const pets = results.map(pet => ({
+        ...pet,
+        imageUrl: pet.pet_image ? `/pet-images/${pet.pet_image}` : '/images/default-pet.jpg' // Set a default image if none exists
+      }));
+
+      res.status(200).json({ pets });
+    });
+  } else {
+    res.status(401).json({ message: 'User not logged in' });
+  }
+});
+
+
+// Assuming you have a session middleware configured01
+app.post('/api/add-pet', upload.single('petImage'), async (req, res) => {
+  const userId = req.session.userId; // Get user ID from session
+  const petData = req.body;
+
+  // Validate pet data
+  if (!petData.petName || !petData.petType || !petData.petBreed ||
+    !petData.petAge || !petData.petGender || !petData.petWeight) {
+    return res.status(400).json({ message: 'Please fill in all required fields' });
+  }
+
+  try {
+    // Check for existing pet with the same name
+    const checkQuery = 'SELECT * FROM pets WHERE user_id = ? AND pet_name = ?';
+    const checkResult = await new Promise((resolve, reject) => {
+      db.query(checkQuery, [userId, petData.petName], (err, results) => {
+        if (err) reject(err);
+        else resolve(results);
+      });
+    });
+
+    if (checkResult.length > 0) {
+      return res.status(400).json({ message: 'Pet with that name already exists' });
+    }
+
+    // Insert the new pet along with the image filename if uploaded
+    const petImage = req.file ? req.file.filename : null;
+    const insertQuery = 'INSERT INTO pets (user_id, pet_name, pet_type, pet_breed, pet_age, pet_gender, pet_weight, pet_image) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
+
+    const insertResult = await new Promise((resolve, reject) => {
+      db.query(insertQuery, [userId, petData.petName, petData.petType, petData.petBreed, petData.petAge, petData.petGender, petData.petWeight, petImage], (err, result) => {
+        if (err) reject(err);
+        else resolve(result);
+      });
+    });
+
+    // If insert is successful, return a success message
+    res.status(200).json({ message: 'Pet added successfully' });
+
+  } catch (err) {
+    console.error('SQL error:', err);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
+
+// Delete pet endpoint
+app.delete('/api/delete-pet/:id', async (req, res) => {
+  const userId = req.session.userId; // Get user ID from session
+  const petId = req.params.id; // Get pet ID from the request parameters
+
+  try {
+    // Check if the pet belongs to the user
+    const checkQuery = 'SELECT * FROM pets WHERE pet_id = ? AND user_id = ?';
+    const checkResult = await new Promise((resolve, reject) => {
+      db.query(checkQuery, [petId, userId], (err, results) => {
+        if (err) reject(err);
+        else resolve(results);
+      });
+    });
+
+    if (checkResult.length === 0) {
+      return res.status(404).json({ message: 'Pet not found or does not belong to the user' });
+    }
+
+    // Get the image filename from the pet record
+    const pet = checkResult[0];
+    const imageFilename = pet.pet_image_filename;
+
+    // Delete the pet
+    const deleteQuery = 'DELETE FROM pets WHERE pet_id = ? AND user_id = ?';
+    await new Promise((resolve, reject) => {
+      db.query(deleteQuery, [petId, userId], (err, result) => {
+        if (err) reject(err);
+        else resolve(result);
+      });
+    });
+
+    // Delete the pet image file if it exists
+    if (imageFilename) {
+      const imagePath = path.join(__dirname, 'pet-images', imageFilename);
+      fs.unlink(imagePath, (err) => {
+        if (err) console.error('Error deleting image file:', err);
+      });
+    }
+
+    // If delete is successful, return a success message
+    res.status(200).json({ message: 'Pet deleted successfully' });
+
+  } catch (err) {
+    console.error('SQL error:', err);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
+app.put('/api/edit-pet/:id', async (req, res) => {
+  const userId = req.session.userId;
+  const petId = req.params.id;
+  const petData = req.body;
+
+  // Validate pet data
+  if (!petData.petName || !petData.petType || !petData.petBreed ||
+    !petData.petAge || !petData.petGender || !petData.petWeight) {
+    return res.status(400).json({ message: 'Please fill in all required fields' });
+  }
+
+  try {
+    // Check if the pet belongs to the user
+    const checkQuery = 'SELECT * FROM pets WHERE pet_id = ? AND user_id = ?';
+    const checkResult = await new Promise((resolve, reject) => {
+      db.query(checkQuery, [petId, userId], (err, results) => {
+        if (err) reject(err);
+        else resolve(results);
+      });
+    });
+
+    if (checkResult.length === 0) {
+      return res.status(404).json({ message: 'Pet not found or does not belong to the user' });
+    }
+
+    // Update pet details
+    const updateQuery = 'UPDATE pets SET pet_name = ?, pet_type = ?, pet_breed = ?, pet_age = ?, pet_gender = ?, pet_weight = ? WHERE pet_id = ? AND user_id = ?';
+    const updateResult = await new Promise((resolve, reject) => {
+      db.query(updateQuery, [petData.petName, petData.petType, petData.petBreed, petData.petAge, petData.petGender, petData.petWeight, petId, userId], (err, result) => {
+        if (err) reject(err);
+        else resolve(result);
+      });
+    });
+
+    res.status(200).json({ message: 'Pet details updated successfully' });
+
+  } catch (err) {
+    console.error('SQL error:', err);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
 
 // End for Client
 

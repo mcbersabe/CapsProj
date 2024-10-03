@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>My Pets</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        #pet-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .pet {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+        }
+
+        .close {
+            color: #aaaaaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 20px;
+            padding-top: 100px;
+            /* Adjust to push content below the menu bar */
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        #pet-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            padding: 0;
+        }
+
+        .pet {
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            background-color: #fff;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            width: 250px;
+            transition: transform 0.3s ease;
+        }
+
+        .pet:hover {
+            transform: translateY(-5px);
+        }
+
+        .pet h2 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+            color: #555;
+        }
+
+        .pet p {
+            font-size: 0.9em;
+            color: #666;
+            margin: 5px 0;
+        }
+
+        button {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 1em;
+            color: white;
+            background-color: #007BFF;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #addPetButton {
+            display: block;
+            margin: 20px auto;
+            font-size: 1.2em;
+            padding: 10px 20px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 400px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .close {
+            float: right;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: #aaa;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        form input,
+        form select {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+
+        form button {
+            background-color: #28a745;
+        }
+
+        form button:hover {
+            background-color: #218838;
+        }
+
+        /* Menu Bar Styles */
+        .menu-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            background-color: white;
+            padding: 15px 30px;
+            border-radius: 30px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+        }
+
+        .menu-list {
+            list-style: none;
+            display: flex;
+            gap: 20px;
+            margin: 0;
+            padding: 0;
+        }
+
+        .menu-list li {
+            display: inline-block;
+        }
+
+        .menu-list li a {
+            text-decoration: none;
+            color: #333;
+            font-size: 1.1em;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+
+        .menu-list li a:hover {
+            color: #007BFF;
+        }
+
+        .profile-section {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .bell-icon {
+            font-size: 1.5em;
+            cursor: pointer;
+            color: #555;
+        }
+
+        .profile-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 2px solid #007BFF;
+        }
+
+        .profile-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .bell-icon:hover,
+        .profile-icon:hover {
+            color: #007BFF;
+        }
+
+        #clientUsername {
+            font-weight: bold;
+            color: #007BFF;
+            /* Customize this color */
+            text-decoration: none;
+            margin-right: 20px;
+            transition: color 0.3s ease;
+        }
+
+        #clientUsername:hover {
+            color: #0056b3;
+            /* A slightly darker shade for hover */
+        }
+
+        /* Dropdown Menu Styling */
+        .dropdown-menu {
+            display: none;
+            /* Hidden by default */
+            position: absolute;
+            top: 70px;
+            right: 0;
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            padding: 10px 0;
+            width: 150px;
+        }
+
+        .dropdown-menu a {
+            display: block;
+            padding: 10px;
+            text-decoration: none;
+            color: #333;
+            font-size: 16px;
+        }
+
+        .dropdown-menu a:hover {
+            background-color: #f1f1f1;
+        }
+
+        .notification-box {
+            display: none;
+            /* Hidden by default */
+            position: absolute;
+            top: 70px;
+            right: 50px;
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            width: 200px;
+            padding: 10px;
+        }
+
+        .notification-box p {
+            margin: 0;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .notification-box p:hover {
+            background-color: #f1f1f1;
+        }
+
+        .pagination-controls {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .pagination-controls button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .pagination-controls button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .pagination-controls span {
+            margin: 0 15px;
+            font-size: 18px;
+        }
+
+        #pet-list {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .pet {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            background-color: #fff;
+            padding: 15px;
+            width: 200px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .pet:hover {
+            transform: translateY(-5px);
+        }
+
+        .pet img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 50%;
+            margin-bottom: 10px;
+        }
+
+        .pet h2 {
+            font-size: 1.2em;
+            margin: 10px 0;
+            color: #333;
+        }
+
+        .pet-detail-image {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            color: white;
+            background-color: #007BFF;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .pagination-controls {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .pagination-controls button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="menu-bar">
+        <ul class="menu-list">
+            <li><a id="clientUsername">Welcome, [User]</a></li>
+            <li><a href="main-client.html">Home</a></li>
+            <li><a href="client-pets.html">Pets</a></li>
+            <li><a href="aproducts.html">Shop</a></li>
+            <li><a href="appmnts.html">Appointments</a></li>
+        </ul>
+
+        <div class="profile-section">
+            <span class="bell-icon" onclick="toggleNotification()">🔔</span>
+            <div class="notification-box" id="notificationBox">
+                <p>No new notifications</p>
+            </div>
+
+            <!-- Profile Icon with Dropdown -->
+            <div class="profile-icon" onclick="toggleDropdown()">
+                <img src="../images/profile.jpg" alt="Profile" class="profile-img">
+                <!-- Dropdown Menu -->
+                <div class="dropdown-menu" id="dropdownMenu">
+                    <a href="profile.html">Profile</a>
+                    <a id="logout-link" href="#">Logout</a>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="content">
+        <h1>My Pets</h1>
+        <div id="pet-list-container">
+            <ul id="pet-list"></ul>
+
+            <!-- Pagination controls -->
+            <div class="pagination-controls">
+                <button id="prevButton" onclick="prevPage()" disabled>Previous</button>
+                <span id="pageNumber">1</span>
+                <button id="nextButton" onclick="nextPage()">Next</button>
+            </div>
+        </div>
+
+        <button id="addPetButton">Add a Pet +</button>
+
+        <!-- Modal for displaying detailed pet information -->
+        <div class="modal" id="petDetailModal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2 id="petDetailName"></h2>
+                <img id="petDetailImage" src="" alt="Pet Image" class="pet-detail-image">
+                <p id="petDetailInfo"></p>
+                <button id="editPetButton">Edit</button>
+                <button id="deletePetButton">Delete Pet</button>
+            </div>
+        </div>
+
+        <div class="modal" id="addPetModal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Add a Pet</h2>
+                <form id="addPetForm">
+                    <label for="petName">Pet Name:</label>
+                    <input type="text" id="petName" name="petName" required>
+                    <label for="petType">Pet Type:</label>
+                    <select id="petType" name="petType" required>
+                        <option value="">Select Pet Type</option>
+                        <option value="Dog">Dog</option>
+                        <option value="Cat">Cat</option>
+                    </select>
+                    <label for="petBreed">Pet Breed:</label>
+                    <input type="text" id="petBreed" name="petBreed" required>
+                    <label for="petAge">Pet Age:</label>
+                    <input type="number" id="petAge" name="petAge" required>
+                    <label for="petGender">Pet Gender:</label>
+                    <select id="petGender" name="petGender" required>
+                        <option value="">Select Pet Gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                    </select>
+                    <label for="petWeight">Pet Weight (kg):</label>
+                    <input type="number" id="petWeight" name="petWeight" required>
+                    <label for="petImage">Pet Image:</label>
+                    <input type="file" id="petImage" name="petImage" accept="image/*" required>
+                    <button type="submit">Add Pet</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="editPetModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Edit Pet Details</h2>
+                <form id="editPetForm">
+                    <input type="hidden" id="editPetId" name="petId">
+                    <label for="editPetName">Name:</label>
+                    <input type="text" id="editPetName" name="petName" required>
+
+                    <label for="editPetType">Type:</label>
+                    <input type="text" id="editPetType" name="petType" required>
+
+                    <label for="editPetBreed">Breed:</label>
+                    <input type="text" id="editPetBreed" name="petBreed" required>
+
+                    <label for="editPetAge">Age:</label>
+                    <input type="number" id="editPetAge" name="petAge" required>
+
+                    <label for="editPetGender">Gender:</label>
+                    <input type="text" id="editPetGender" name="petGender" required>
+
+                    <label for="editPetWeight">Weight (kg):</label>
+                    <input type="number" id="editPetWeight" name="petWeight" required>
+
+                    <button type="submit">Save Changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+<script>
+    function toggleDropdown() {
+        const dropdown = document.getElementById('dropdownMenu');
+        dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+    }
+
+    // Close dropdown when clicked outside
+    window.onclick = function (event) {
+        if (!event.target.matches('.profile-img')) {
+            const dropdowns = document.getElementsByClassName('dropdown-menu');
+            for (let i = 0; i < dropdowns.length; i++) {
+                const openDropdown = dropdowns[i];
+                if (openDropdown.style.display === 'block') {
+                    openDropdown.style.display = 'none';
+                }
+            }
+        }
+    }
+
+    function toggleNotification() {
+        const notificationBox = document.getElementById('notificationBox');
+        notificationBox.style.display = notificationBox.style.display === 'block' ? 'none' : 'block';
+    }
+
+    // Close notification box when clicking outside
+    window.onclick = function (event) {
+        if (!event.target.matches('.bell-icon')) {
+            const notifications = document.getElementsByClassName('notification-box');
+            for (let i = 0; i < notifications.length; i++) {
+                const openNotification = notifications[i];
+                if (openNotification.style.display === 'block') {
+                    openNotification.style.display = 'none';
+                }
+            }
+        }
+
+        // Close profile dropdown as well if clicked outside
+        if (!event.target.matches('.profile-img')) {
+            const dropdowns = document.getElementsByClassName('dropdown-menu');
+            for (let i = 0; i < dropdowns.length; i++) {
+                const openDropdown = dropdowns[i];
+                if (openDropdown.style.display === 'block') {
+                    openDropdown.style.display = 'none';
+                }
+            }
+        }
+    }
+
+    fetch('/current-user')
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                throw new Error('Failed to fetch user data');
+            }
+        })
+        .then(data => {
+            // Update UI to display current user's information
+            const welcomeMessage = document.getElementById('clientUsername');
+            welcomeMessage.textContent = `Welcome, ${data.user.username}`;
+            // Load appointments once the user is known
+            loadAppointments();
+        })
+        .catch(error => {
+            console.error('Error fetching user data:', error);
+        });
+
+    let currentPage = 1;
+    const itemsPerPage = 3;
+    let pets = [];
+
+    // Fetch the pet data
+    fetch('/current-user/pets')
+        .then(response => response.json())
+        .then(data => {
+            pets = data.pets; // Store all pet data
+            displayPets();
+        })
+        .catch(error => {
+            console.error('Error fetching pet data:', error);
+        });
+
+    // Function to display pets based on the current page
+    function displayPets() {
+        const petListElement = document.getElementById('pet-list');
+        petListElement.innerHTML = ''; // Clear current list
+
+        const start = (currentPage - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
+        const petsToShow = pets.slice(start, end);
+
+        petsToShow.forEach(pet => {
+            const petElement = document.createElement('li');
+            petElement.classList.add('pet');
+
+            petElement.innerHTML = `
+            <img src="${pet.imageUrl}" alt="Pet Image" class="pet-icon">
+            <h2>${pet.pet_name}</h2>
+        `;
+
+            petElement.addEventListener('click', () => {
+                showPetDetails(pet);
+            });
+
+            petListElement.appendChild(petElement);
+        });
+
+        // Update pagination controls
+        document.getElementById('pageNumber').textContent = currentPage;
+        document.getElementById('prevButton').disabled = currentPage === 1;
+        document.getElementById('nextButton').disabled = end >= pets.length;
+    }
+
+    // Go to the next page
+    function nextPage() {
+        if (currentPage * itemsPerPage < pets.length) {
+            currentPage++;
+            displayPets();
+        }
+    }
+
+    // Go to the previous page
+    function prevPage() {
+        if (currentPage > 1) {
+            currentPage--;
+            displayPets();
+        }
+    }
+
+    // Function to show pet details in a modal
+    function showPetDetails(pet) {
+        const modal = document.getElementById('petDetailModal');
+        document.getElementById('petDetailName').innerText = pet.pet_name;
+        document.getElementById('petDetailImage').src = pet.imageUrl;
+        document.getElementById('petDetailInfo').innerText = `
+        Type: ${pet.pet_type}
+        Breed: ${pet.pet_breed}
+        Age: ${pet.pet_age} years
+        Gender: ${pet.pet_gender}
+        Weight: ${pet.pet_weight} kg
+        Last Updated: ${new Date(pet.last_updated_at).toISOString().split('T')[0]}
+    `;
+
+        document.getElementById('deletePetButton').onclick = () => deletePet(pet.pet_id);
+        // Add event listener for the edit button
+        document.getElementById('editPetButton').onclick = () => {
+            openEditPetForm(pet);
+        };
+
+        // Set the edit form fields
+        document.getElementById('editPetId').value = pet.pet_id;
+        document.getElementById('editPetName').value = pet.pet_name;
+        document.getElementById('editPetType').value = pet.pet_type;
+        document.getElementById('editPetBreed').value = pet.pet_breed;
+        document.getElementById('editPetAge').value = pet.pet_age;
+        document.getElementById('editPetGender').value = pet.pet_gender;
+        document.getElementById('editPetWeight').value = pet.pet_weight;
+
+
+        modal.style.display = 'block';
+    }
+
+    // Close the modal when 'x' is clicked
+    const closeModalButtons = document.querySelectorAll('.close');
+    closeModalButtons.forEach(btn => {
+        btn.onclick = () => {
+            btn.closest('.modal').style.display = 'none';
+        };
+    });
+
+    // Function to open the edit pet form with current pet details
+    function openEditPetForm(pet) {
+        // Populate the edit form with the current pet details
+        document.getElementById('editPetName').value = pet.pet_name;
+        document.getElementById('editPetType').value = pet.pet_type;
+        document.getElementById('editPetBreed').value = pet.pet_breed;
+        document.getElementById('editPetAge').value = pet.pet_age;
+        document.getElementById('editPetGender').value = pet.pet_gender;
+        document.getElementById('editPetWeight').value = pet.pet_weight;
+
+        // Open the edit modal
+        const editModal = document.getElementById('editPetModal');
+        editModal.style.display = 'block';
+    }
+
+    // Delete pet function
+    function deletePet(petId) {
+        if (confirm('Are you sure you want to delete this pet?')) {
+            fetch(`/api/delete-pet/${petId}`, {
+                method: 'DELETE',
+            })
+                .then(response => {
+                    if (response.ok) {
+                        alert('Pet deleted successfully.');
+                        window.location.reload(); // Reload the page to reflect changes
+                    } else {
+                        return response.json().then(data => {
+                            throw new Error(data.message);
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error deleting pet:', error);
+                    alert('An error occurred while deleting the pet. Please try again.');
+                });
+        }
+    }
+
+    // Handle the form submission for editing pet details
+    document.getElementById('editPetForm').addEventListener('submit', (event) => {
+        event.preventDefault();
+
+        // Fetch form values
+        const petId = document.getElementById('editPetId').value; // Add hidden input to store petId
+        const petName = document.getElementById('editPetName').value;
+        const petType = document.getElementById('editPetType').value;
+        const petBreed = document.getElementById('editPetBreed').value;
+        const petAge = document.getElementById('editPetAge').value;
+        const petGender = document.getElementById('editPetGender').value;
+        const petWeight = document.getElementById('editPetWeight').value;
+
+        // Send data to server using fetch
+        fetch(`/api/edit-pet/${petId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                petName,
+                petType,
+                petBreed,
+                petAge,
+                petGender,
+                petWeight
+            })
+        })
+            .then(response => {
+                if (response.ok) {
+                    alert('Pet details updated successfully.');
+                    document.getElementById('editPetModal').style.display = 'none'; // Close the modal
+                    window.location.reload(); // Reload the page to reflect changes
+                } else {
+                    return response.json().then(data => {
+                        throw new Error(data.message);
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error updating pet:', error);
+                alert('An error occurred while updating the pet. Please try again.');
+            });
+    });
+
+    const addPetButton = document.getElementById('addPetButton');
+    const addPetModal = document.getElementById('addPetModal');
+    const closeButton = document.querySelector('.close');
+    const addPetForm = document.getElementById('addPetForm');
+
+    // Function to validate pet data (basic example)
+    function validatePetForm() {
+        const petName = document.getElementById('petName').value;
+        const petType = document.getElementById('petType').value;
+        const petBreed = document.getElementById('petBreed').value;
+        const petAge = document.getElementById('petAge').value;
+        const petGender = document.getElementById('petGender').value;
+        const petWeight = document.getElementById('petWeight').value;
+        const petImage = document.getElementById('petImage').files[0];
+
+        if (!petName || !petType || !petBreed || !petAge || !petGender || !petWeight || !petImage) {
+            alert('Please fill in all required fields and upload an image.');
+            return false;
+        }
+
+        return true;
+    }
+
+    addPetButton.addEventListener('click', () => {
+        addPetModal.style.display = 'block';
+    });
+
+    closeButton.addEventListener('click', () => {
+        addPetModal.style.display = 'none';
+    });
+
+    window.addEventListener('click', (event) => {
+        if (event.target === addPetModal) {
+            addPetModal.style.display = 'none';
+        }
+    });
+
+    addPetForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+
+        // Validate form data
+        if (!validatePetForm()) {
+            return;
+        }
+
+        // Create FormData object to handle the file and other data
+        const formData = new FormData(addPetForm);
+
+        // Send form data to the server
+        fetch('/api/add-pet', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => {
+                if (response.ok) {
+                    console.log('Pet added successfully!');
+                    addPetModal.style.display = 'none'; // Close modal on success
+                    window.location.reload(); // Reload to update pet list
+                } else {
+                    response.json().then(data => {
+                        console.error('Error adding pet:', data.message);
+                        alert('Error: ' + data.message);
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error adding pet:', error);
+                alert('An unexpected error occurred. Please try again.');
+            });
+    });
+
+    // For logout link
+    document.getElementById('logout-link').addEventListener('click', function (event) {
+        event.preventDefault(); // Prevent the default link behavior
+
+        // Display a confirmation dialog
+        const confirmed = confirm('Are you sure you want to logout?');
+        if (!confirmed) {
+            return; // Do nothing if the user cancels the logout
+        }
+
+        // Perform logout via AJAX
+        fetch('/logout', {
+            method: 'POST'
+        })
+            .then(response => {
+                if (response.ok) {
+                    // Redirect to login page after successful logout
+                    window.location.href = '/login.html';
+                } else {
+                    console.error('Logout failed:', response.statusText);
+                }
+            })
+            .catch(error => {
+                console.error('Error during logout:', error);
+            });
+    });
+
+
+</script>
+
+</html>
